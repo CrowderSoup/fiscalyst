@@ -20,7 +20,6 @@ type Transaction struct {
 func getFloat(floatString string) float64 {
 	debit, err := strconv.ParseFloat(floatString, 64)
 	if err != nil {
-		log.Print(err)
 		return 0
 	}
 	return debit
@@ -28,7 +27,13 @@ func getFloat(floatString string) float64 {
 
 func createTransactionList(data [][]string) []Transaction {
 	var transactions []Transaction
-	for _, row := range data {
+	for i, row := range data {
+
+		// Skip the first row
+		if i == 0 {
+			continue;
+		}
+
 		transactionDate, err := time.Parse("01/02/2006", row[0])
 		if err != nil {
 			log.Print(err)
@@ -44,6 +49,16 @@ func createTransactionList(data [][]string) []Transaction {
 		})
 	}
 	return transactions
+}
+
+func sum(transactions []Transaction) (float64, float64) {
+	var debits float64
+	var credits float64
+	for _, transaction := range transactions {
+		debits += transaction.Debit
+		credits += transaction.Credit
+	}
+	return debits, credits
 }
 
 func main() {
@@ -62,5 +77,7 @@ func main() {
 	}
 
 	transactions := createTransactionList(data)
-	fmt.Println(transactions)
+	debits, credits := sum(transactions)
+	fmt.Printf("Debits: $%.2f\n", debits)
+	fmt.Printf("Credits: $%.2f", credits)
 }
